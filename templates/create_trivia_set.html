@@ -1,0 +1,57 @@
+<!-- create_trivia_set.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Trivia Set</title>
+</head>
+<body>
+    <h1>Create Trivia Set</h1>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/create_trivia_set">
+        <label for="set_title">Set Title:</label>
+        <input type="text" id="set_title" name="set_title" required><br><br>
+
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" required><br><br>
+
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" name="difficulty" required>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select><br><br>
+
+        <label for="num_questions">Number of Questions:</label>
+        <input type="number" id="num_questions" name="num_questions" min="1" required><br><br>
+
+        {% for i in range(num_questions) %}
+            <label for="question_{{ i+1 }}">Question {{ i+1 }}:</label>
+            <input type="text" id="question_{{ i+1 }}" name="question_{{ i+1 }}" required><br>
+
+            <label for="num_options_{{ i+1 }}">Number of Options:</label>
+            <input type="number" id="num_options_{{ i+1 }}" name="num_options_{{ i+1 }}" min="1" required><br>
+
+            {% for j in range(num_options) %}
+                <label for="option_{{ i+1 }}_{{ j+1 }}">Option {{ j+1 }}:</label>
+                <input type="text" id="option_{{ i+1 }}_{{ j+1 }}" name="option_{{ i+1 }}_{{ j+1 }}" required>
+
+                <label for="is_correct_{{ i+1 }}_{{ j+1 }}">Is Correct:</label>
+                <input type="checkbox" id="is_correct_{{ i+1 }}_{{ j+1 }}" name="is_correct_{{ i+1 }}_{{ j+1 }}">
+            {% endfor %}
+
+        {% endfor %}
+
+        <input type="submit" value="Create Trivia Set">
+    </form>
+</body>
+</html>

@@ -1,5 +1,6 @@
 from flask import Flask, flash, render_template, redirect, request, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import login_required, current_user
 import os
 # from models import TriviaSet, Question
 
@@ -28,22 +29,52 @@ def view_trivia_set(set_id):
     return render_template('trivia_set.html', trivia_set=trivia_set)
 
 # Route to create a new Trivia Set
-@app.route('/create_set', methods=['GET', 'POST'])
+@app.route('/create_trivia_set', methods=['GET', 'POST'])
+@login_required  # Ensure that only logged-in users can create trivia sets
 def create_trivia_set():
-    from models import TriviaSet
+    from models import TriviaSet, Question, Option
     if request.method == 'POST':
-        set_title = request.form.get('set_title')
-        category = request.form.get('category')
-        difficulty = request.form.get('difficulty')
+        # Handle form submission for creating a trivia set
+        set_title = request.form['set_title']
+        category = request.form['category']
+        difficulty = request.form['difficulty']
 
-        new_set = TriviaSet(set_title=set_title, category=category, difficulty=difficulty)
-        db.session.add(new_set)
-        db.session.commit()
+        # Create a new TriviaSet instance and add it to the database
+        new_set = TriviaSet(set_title=set_title, category=category, difficulty=difficulty, user_id=current_user.id)
 
-        flash('Trivia Set created successfully', 'success')
-        return redirect(url_for('list_trivia_sets'))
+        try:
+            db.session.add(new_set)
+            db.session.commit()
+            flash('Trivia set created successfully!', 'success')
 
-    return render_template('create_set.html')
+            # Now, let's add questions and options
+            num_questions = int(request.form['num_questions'])
+
+            for i in range(num_questions):
+                question_text = request.form[f'question_{i+1}']
+                question_type = 'multiple_choice'  # Assuming all questions are multiple-choice
+
+                new_question = Question(question_text=question_text, question_type=question_type, trivia_set=new_set)
+                db.session.add(new_question)
+                db.session.commit()
+
+                # Add options for each question
+                num_options = int(request.form[f'num_options_{i+1}'])
+
+                for j in range(num_options):
+                    option_text = request.form[f'option_{i+1}_{j+1}']
+                    is_correct = bool(request.form.get(f'is_correct_{i+1}_{j+1}', False))
+
+                    new_option = Option(text=option_text, is_correct=is_correct, question=new_question)
+                    db.session.add(new_option)
+                    db.session.commit()
+
+            return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred while creating the trivia set. Please try again.', 'danger')
+
+    return render_template('create_trivia_set.html')
 
 # Route to play a Trivia Set
 @app.route('/play_set/<int:set_id>')
