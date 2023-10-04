@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Sets</title>
+</head>
+<body>
+    <h1>Trivia Sets</h1>
+    <ul>
+        {% for trivia_set in trivia_sets %}
+            <li>
+                <a href="/trivia_set/{{ trivia_set.id }}">{{ trivia_set.set_title }}</a>
+                - Category: {{ trivia_set.category }} - Difficulty: {{ trivia_set.difficulty }}
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Home</a>
+</body>
+</html>

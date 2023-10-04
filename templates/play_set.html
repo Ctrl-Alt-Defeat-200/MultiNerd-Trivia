@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Trivia Set - {{ trivia_set.set_title }}</title>
+</head>
+<body>
+    <h1>Play Trivia Set - {{ trivia_set.set_title }}</h1>
+    <ul>
+        {% for question in questions %}
+            <li>
+                {{ question.content }}
+                <ul>
+                    <li><input type="radio" name="option" value="1">{{ question.option1 }}</li>
+                    <li><input type="radio" name="option" value="2">{{ question.option2 }}</li>
+                    <li><input type="radio" name="option" value="3">{{ question.option3 }}</li>
+                    <li><input type="radio" name="option" value="4">{{ question.option4 }}</li>
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    <button>Submit</button>
+    <a href="/trivia_sets">Back to Trivia Sets</a>
+</body>
+</html>
