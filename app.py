@@ -1,6 +1,8 @@
 from flask import Flask, flash, render_template, redirect, request, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from werkzeug.urls import url_decode
 import bcrypt
 # from models import TriviaSet, Question
 
@@ -81,8 +83,19 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Only authenticated users can access this route
-    return render_template('dashboard.html', user=current_user)
+    from models import TriviaSet, UserScore
+    # Retrieve user's top scores
+    top_scores = UserScore.query.filter_by(user_id=current_user.id).order_by(UserScore.score.desc()).limit(10).all()
+
+    # Retrieve most played categories
+    category_counts = db.session.query(
+        TriviaSet.category,
+        func.count(TriviaSet.category).label('count')
+    ).filter(TriviaSet.user_id == current_user.id).group_by(TriviaSet.category).order_by(func.count(TriviaSet.category).desc()).limit(5).all()
+
+    most_played_categories = {category: count for category, count in category_counts}
+
+    return render_template('dashboard.html', user=current_user, top_scores=top_scores, most_played_categories=most_played_categories)
 
 # Route to list all Trivia Sets
 @app.route('/trivia_sets')
