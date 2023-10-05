@@ -1,7 +1,9 @@
 from app import db
+from flask_login import UserMixin
+import bcrypt
 
 # Models
-class User(db.Model):
+class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -11,8 +13,18 @@ class User(db.Model):
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
-        self.password = password
+        self.password = self.generate_password_hash(password)
 
+    @staticmethod
+    def get(user_id):
+        return User.query.get(int(user_id))
+
+    def generate_password_hash(self, password):
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    def check_password(self, password):
+        return bcrypt.checkpw(password.encode('utf-8'), self.password)
+    
 class TriviaSet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     set_title = db.Column(db.String(100), nullable=False)
